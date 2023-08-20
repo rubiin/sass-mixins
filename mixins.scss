@@ -1,19 +1,120 @@
-@mixin prefix($declarations, $prefixes: ()) {
+@charset "UTF-8";
+@use "sass:math";
 
-  @each $property,
-  $value in $declarations {
-    @each $prefix in $prefixes {
-      #{'-' + $prefix + '-' + $property}: $value;
+/* Prefix
+-------------------------*/
+@function rbn-prefix($property, $prefixes: (webkit moz o ms)) {
+  $vendor-prefixed-properties: transform background-clip background-size;
+  $result: ();
+
+  @each $prefix in $prefixes {
+    @if index($vendor-prefixed-properties, $property) {
+      $property: -#{$prefix}-#{$property}
     }
 
-    // Output standard non-prefixed declaration
-    #{$property}: $value;
+    $result: append($result, $property);
   }
+
+  @return $result;
 }
 
 
+/* Box
+-------------------------*/
+@mixin rbn-box($width, $height: $width) {
+  width: $width;
+  height: $height;
+}
 
 
+/* Flex center
+-------------------------*/
+@mixin rbn-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* Border Radius
+-------------------------*/
+@mixin rbn-border-radius($radius) {
+  -webkit-border-radius: $radius;
+  border-radius: $radius;
+  background-clip: padding-box;
+  /* stops bg color from leaking outside the border: */
+}
+
+// Single side border-radius
+
+@mixin rbn-border-top-radius($radius) {
+  -webkit-border-top-right-radius: $radius;
+  border-top-right-radius: $radius;
+  -webkit-border-top-left-radius: $radius;
+  border-top-left-radius: $radius;
+  background-clip: padding-box;
+}
+
+@mixin rbn-border-right-radius($radius) {
+  -webkit-border-bottom-right-radius: $radius;
+  border-bottom-right-radius: $radius;
+  -webkit-border-top-right-radius: $radius;
+  border-top-right-radius: $radius;
+  background-clip: padding-box;
+}
+
+@mixin rbn-border-bottom-radius($radius) {
+  -webkit-border-bottom-right-radius: $radius;
+  border-bottom-right-radius: $radius;
+  -webkit-border-bottom-left-radius: $radius;
+  border-bottom-left-radius: $radius;
+  background-clip: padding-box;
+}
+
+@mixin rbn-border-left-radius($radius) {
+  -webkit-border-bottom-left-radius: $radius;
+  border-bottom-left-radius: $radius;
+  -webkit-border-top-left-radius: $radius;
+  border-top-left-radius: $radius;
+  background-clip: padding-box;
+}
+
+/* Center Block
+-------------------------*/
+@mixin rbn-center-block {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+/* Clearfix
+-------------------------*/
+@mixin rbn-clearfix {
+
+  &:before,
+  &:after {
+    content: "";
+    display: table;
+  }
+
+  &:after {
+    clear: both;
+  }
+}
+
+/* Text overflow
+-------------------------*/
+@mixin rbn-truncate($truncation-boundary) {
+  max-width: $truncation-boundary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* Breakpoints
+-------------------------*/
 $bp: (
   mobile: 480px,
   tablet: 768px,
@@ -21,7 +122,7 @@ $bp: (
 );
 
 
-@mixin query($display) {
+@mixin rbn-query($display) {
 
   @each $key,
   $value in $bp {
@@ -35,13 +136,28 @@ $bp: (
   }
 }
 
-.container {
-  width: 1000px;
+/* Font size
+-------------------------*/
+@mixin rbn-font-size($size) {
+  font-size: $size;
+  font-size: ($size / 16px) * 1rem;
+}
 
-  @include query(mobile) {
-    width: 500px;
 
-    // you can pick any value you wish.
-    height: 500px;
+/* Responsive ratio
+-------------------------*/
+@mixin rbn-responsive-ratio($x, $y, $pseudo: false) {
+  $padding: unquote(($y / $x ) * 100 + '%');
+
+  @if $pseudo {
+    &:before {
+      @include pseudo($pos: relative);
+      width: 100%;
+      padding-top: $padding;
+    }
+  }
+
+  @else {
+    padding-top: $padding;
   }
 }
